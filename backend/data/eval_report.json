@@ -1,0 +1,460 @@
+{
+  "run": {
+    "run_id": "run-1753ed29",
+    "mode": "ladder -> text-layer x9",
+    "retrieval_strategy": "hybrid",
+    "lines_audited": 66,
+    "invoices_blocked_by_sum_check": 0,
+    "blocked_detail": [],
+    "by_disposition": {
+      "AUTO_APPROVED": 33,
+      "NEEDS_REVIEW": 29,
+      "AUTO_DISPUTED": 4
+    },
+    "by_category": {
+      "WITHIN_TOLERANCE": 9,
+      "REWEIGH": 7,
+      "FUEL_SURCHARGE_ERROR": 3,
+      "RECLASS": 5,
+      "NO_VARIANCE": 22,
+      "UNAUTHORIZED_ACCESSORIAL": 8,
+      "RATE_CARD_MISMATCH": 5,
+      "DUPLICATE_BILLING": 4,
+      "UNKNOWN": 3
+    },
+    "automation_rate": 0.5606,
+    "escalation_rate": 0.4394,
+    "total_billed_usd": 85269.09,
+    "recoverable_usd": 7769.14,
+    "recoverable_pct_of_billed": 9.11,
+    "wall_seconds": 148.9,
+    "usage": {
+      "models": {
+        "extract": "claude-opus-5",
+        "classify": "claude-opus-5",
+        "rerank": "claude-opus-5"
+      },
+      "calls": 31,
+      "input_tokens": 41159,
+      "output_tokens": 8986,
+      "cache_read_tokens": 41970,
+      "cache_write_tokens": 1399,
+      "cache_hit": true,
+      "cost_usd": 0.4602,
+      "calls_by_stage": {
+        "classify": 31
+      },
+      "cost_by_stage": {
+        "classify": {
+          "model": "claude-opus-5",
+          "calls": 31,
+          "cost_usd": 0.46017
+        }
+      }
+    },
+    "cost_per_line_usd": 0.00697,
+    "extraction_methods": {
+      "text-layer": 9
+    },
+    "budget_usd": 2.5,
+    "stopped_on_budget": false,
+    "invoices_total": 9
+  },
+  "classification": {
+    "n_scored": 65,
+    "n_unscored": 0,
+    "n_blind_spot": 1,
+    "accuracy": 0.9385,
+    "macro_f1": 0.912,
+    "per_category": {
+      "DUPLICATE_BILLING": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 4,
+        "tp": 4,
+        "fp": 0,
+        "fn": 0
+      },
+      "FUEL_SURCHARGE_ERROR": {
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667,
+        "support": 6,
+        "tp": 3,
+        "fp": 0,
+        "fn": 3
+      },
+      "NO_VARIANCE": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 21,
+        "tp": 21,
+        "fp": 0,
+        "fn": 0
+      },
+      "RATE_CARD_MISMATCH": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 5,
+        "tp": 5,
+        "fp": 0,
+        "fn": 0
+      },
+      "RECLASS": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 5,
+        "tp": 5,
+        "fp": 0,
+        "fn": 0
+      },
+      "REWEIGH": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 7,
+        "tp": 7,
+        "fp": 0,
+        "fn": 0
+      },
+      "UNAUTHORIZED_ACCESSORIAL": {
+        "precision": 1.0,
+        "recall": 0.8889,
+        "f1": 0.9412,
+        "support": 9,
+        "tp": 8,
+        "fp": 0,
+        "fn": 1
+      },
+      "UNKNOWN": {
+        "precision": 0.6667,
+        "recall": 1.0,
+        "f1": 0.8,
+        "support": 2,
+        "tp": 2,
+        "fp": 1,
+        "fn": 0
+      },
+      "WITHIN_TOLERANCE": {
+        "precision": 0.6667,
+        "recall": 1.0,
+        "f1": 0.8,
+        "support": 6,
+        "tp": 6,
+        "fp": 3,
+        "fn": 0
+      }
+    },
+    "confusion": {
+      "FUEL_SURCHARGE_ERROR -> WITHIN_TOLERANCE": 3,
+      "UNAUTHORIZED_ACCESSORIAL -> UNKNOWN": 1
+    }
+  },
+  "business": {
+    "recoverable_identified_usd": 7769.14,
+    "recoverable_missed_usd": 18.71,
+    "dollar_recall": 0.9976,
+    "defect_lines_caught": 33,
+    "defect_lines_missed": 2,
+    "false_disputes": 0,
+    "false_dispute_rate": 0.0
+  },
+  "retrieval": {
+    "embedder": "hashing-local",
+    "k": 4,
+    "strategies": {
+      "bm25": {
+        "recall_at_4": 1.0,
+        "mrr": 1.0,
+        "per_case": {
+          "REWEIGH": {
+            "target": "MFS-110",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-110#1",
+              "MFS-400",
+              "MFS-110#0",
+              "MFS-120#0"
+            ]
+          },
+          "RECLASS": {
+            "target": "MFS-120",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-120#0",
+              "MFS-400",
+              "MFS-120#1",
+              "MFS-100"
+            ]
+          },
+          "UNAUTHORIZED_ACCESSORIAL": {
+            "target": "MFS-200",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-200#0",
+              "MFS-400",
+              "MFS-200#1",
+              "MFS-110#1"
+            ]
+          },
+          "DUPLICATE_BILLING": {
+            "target": "MFS-300",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-300",
+              "MFS-400",
+              "MFS-210#0",
+              "MFS-130"
+            ]
+          },
+          "FUEL_SURCHARGE_ERROR": {
+            "target": "MFS-130",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-130",
+              "MFS-400",
+              "MFS-100",
+              "MFS-220"
+            ]
+          },
+          "RATE_CARD_MISMATCH": {
+            "target": "MFS-100",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-100",
+              "MFS-400",
+              "MFS-130",
+              "MFS-120#0"
+            ]
+          }
+        }
+      },
+      "dense": {
+        "recall_at_4": 1.0,
+        "mrr": 0.9167,
+        "per_case": {
+          "REWEIGH": {
+            "target": "MFS-110",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-110#1",
+              "MFS-110#0",
+              "MFS-400",
+              "MFS-120#0"
+            ]
+          },
+          "RECLASS": {
+            "target": "MFS-120",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-120#0",
+              "MFS-120#1",
+              "MFS-400",
+              "MFS-300"
+            ]
+          },
+          "UNAUTHORIZED_ACCESSORIAL": {
+            "target": "MFS-200",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-200#0",
+              "MFS-400",
+              "MFS-210#0",
+              "MFS-230"
+            ]
+          },
+          "DUPLICATE_BILLING": {
+            "target": "MFS-300",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-300",
+              "MFS-400",
+              "MFS-210#0",
+              "MFS-120#0"
+            ]
+          },
+          "FUEL_SURCHARGE_ERROR": {
+            "target": "MFS-130",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-130",
+              "MFS-400",
+              "MFS-100",
+              "MFS-200#0"
+            ]
+          },
+          "RATE_CARD_MISMATCH": {
+            "target": "MFS-100",
+            "found": true,
+            "rank": 2,
+            "returned": [
+              "MFS-400",
+              "MFS-100",
+              "MFS-110#1",
+              "MFS-210#0"
+            ]
+          }
+        }
+      },
+      "hybrid": {
+        "recall_at_4": 1.0,
+        "mrr": 1.0,
+        "per_case": {
+          "REWEIGH": {
+            "target": "MFS-110",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-110#1",
+              "MFS-400",
+              "MFS-110#0",
+              "MFS-120#0"
+            ]
+          },
+          "RECLASS": {
+            "target": "MFS-120",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-120#0",
+              "MFS-400",
+              "MFS-120#1",
+              "MFS-100"
+            ]
+          },
+          "UNAUTHORIZED_ACCESSORIAL": {
+            "target": "MFS-200",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-200#0",
+              "MFS-400",
+              "MFS-200#1",
+              "MFS-210#1"
+            ]
+          },
+          "DUPLICATE_BILLING": {
+            "target": "MFS-300",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-300",
+              "MFS-400",
+              "MFS-210#0",
+              "MFS-120#0"
+            ]
+          },
+          "FUEL_SURCHARGE_ERROR": {
+            "target": "MFS-130",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-130",
+              "MFS-400",
+              "MFS-100",
+              "MFS-210#0"
+            ]
+          },
+          "RATE_CARD_MISMATCH": {
+            "target": "MFS-100",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-100",
+              "MFS-400",
+              "MFS-130",
+              "MFS-120#0"
+            ]
+          }
+        }
+      },
+      "hybrid_rerank": {
+        "recall_at_4": 1.0,
+        "mrr": 1.0,
+        "per_case": {
+          "REWEIGH": {
+            "target": "MFS-110",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-110#0",
+              "MFS-110#1",
+              "MFS-400",
+              "MFS-300"
+            ]
+          },
+          "RECLASS": {
+            "target": "MFS-120",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-120#0",
+              "MFS-400",
+              "MFS-120#1",
+              "MFS-110#0"
+            ]
+          },
+          "UNAUTHORIZED_ACCESSORIAL": {
+            "target": "MFS-200",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-200#0",
+              "MFS-400",
+              "MFS-200#1",
+              "MFS-210#1"
+            ]
+          },
+          "DUPLICATE_BILLING": {
+            "target": "MFS-300",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-300",
+              "MFS-400",
+              "MFS-120#0",
+              "MFS-120#1"
+            ]
+          },
+          "FUEL_SURCHARGE_ERROR": {
+            "target": "MFS-130",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-130",
+              "MFS-400",
+              "MFS-100",
+              "MFS-300"
+            ]
+          },
+          "RATE_CARD_MISMATCH": {
+            "target": "MFS-100",
+            "found": true,
+            "rank": 1,
+            "returned": [
+              "MFS-100",
+              "MFS-400",
+              "MFS-110#0",
+              "MFS-120#0"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
