@@ -168,7 +168,11 @@ _embedder: Embedder | None = None
 def embedder() -> Embedder:
     global _embedder
     if _embedder is None:
-        key = os.environ.get("VOYAGE_API_KEY")
+        from . import llm  # noqa: PLC0415  -- same local import as llm_rerank
+
+        # Offline (--stub) means no network at all, so the paid embedder is skipped
+        # even when its key is set.
+        key = None if llm.offline() else os.environ.get("VOYAGE_API_KEY")
         if key:
             try:
                 _embedder = VoyageEmbedder(key)
@@ -208,6 +212,15 @@ def _load_vectors(con: sqlite3.Connection) -> tuple[list[str], np.ndarray]:
     rows = db.rows(con, "SELECT id, dim, vec FROM clause_vectors ORDER BY id")
     if not rows:
         return [], np.zeros((0, embedder().dim), dtype=np.float32)
+    emb = embedder()
+    if any(r["dim"] != emb.dim for r in rows):
+        # The index was built by a different embedder than the one running now
+        # (Voyage at seed time, the local hashing embedder under --stub). Vectors
+        # from two spaces cannot be compared, so re-embed the clauses in memory
+        # with the current embedder. The corpus is a handful of chunks.
+        clauses = db.rows(con, "SELECT id, title, text FROM clauses ORDER BY id")
+        texts = [f"{c['title']}. {c['text']}" for c in clauses]
+        return [c["id"] for c in clauses], emb.encode(texts)
     ids = [r["id"] for r in rows]
     mat = np.vstack([np.frombuffer(r["vec"], dtype=np.float32) for r in rows])
     return ids, mat

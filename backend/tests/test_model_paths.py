@@ -883,3 +883,52 @@ def test_upload_duplicate_seed_sees_pros_from_other_invoices():
     assert seen, "no PROs from other invoices"
     assert target["pro_number"] not in seen or True  # same PRO may legitimately recur
     assert len(seen) > 5
+
+
+# ---------------------------------------------------------------------------
+# --stub is offline: a configured key must not turn a free run into a paid one
+# ---------------------------------------------------------------------------
+
+
+def test_go_offline_refuses_the_model_even_with_a_key(monkeypatch):
+    monkeypatch.setattr(llm, "_offline", False)  # restored after the test
+    monkeypatch.setattr(llm, "_client", None)
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-api03-FAKE")
+    assert llm.available()
+
+    llm.go_offline()
+    assert not llm.available()
+    with pytest.raises(llm.LLMUnavailable):
+        llm.client()
+
+
+def test_stub_run_makes_no_model_calls_with_a_key_present(monkeypatch):
+    """The regression: classification used to call the model under --stub
+    whenever a key was configured."""
+    from app import db, pipeline
+
+    calls = []
+
+    def spy(*a, **kw):
+        calls.append(kw.get("stage"))
+        raise AssertionError("a stub run reached the model")
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-api03-FAKE")
+    monkeypatch.setattr(llm, "structured", spy)
+    con = db.connect()
+    summary = pipeline.run(con, stub=True, verbose=False, limit=2)
+
+    assert calls == []
+    assert summary["usage"]["cost_usd"] == 0
+
+
+def test_offline_skips_the_paid_embedder_and_still_searches(monkeypatch):
+    from app import db, retrieve
+
+    monkeypatch.setattr(llm, "_offline", True)
+    monkeypatch.setattr(retrieve, "_embedder", None)
+    monkeypatch.setenv("VOYAGE_API_KEY", "pa-FAKE")
+    assert isinstance(retrieve.embedder(), retrieve.HashingEmbedder)
+
+    con = db.connect()
+    assert retrieve.search(con, "liftgate at delivery", k=4, strategy="hybrid")

@@ -142,7 +142,7 @@ python3 -m venv .venv && ./.venv/bin/pip install -r requirements.txt
 cd backend
 
 python -m app.cli seed                 # synthetic book + invoice PDFs
-python -m pytest tests/ -q             # 20 tests, no API key needed
+python -m pytest tests/ -q             # 67 tests, no API key needed
 python eval/run_eval.py --stub         # full eval, no API key needed
 python -m app.cli serve                # review UI at http://127.0.0.1:8000
 ```
@@ -183,8 +183,8 @@ python -m app.cli run --limit 1 --max-spend 0.50    # smoke test, ~$0.20
 python eval/run_eval.py --max-spend 2.00            # full run under a cap
 ```
 
-`--stub` makes no API calls at all, so it is free and the ceiling never applies to
-it. Start there, then spend one invoice, then run the whole thing.
+`--stub` makes no API calls at all, even with a key configured, so it is free and the
+ceiling never applies to it. Start there, then spend one invoice, then run the whole thing.
 
 Prompt caching makes repeat runs cheaper than the first: the system prefix is
 marked cacheable and `cache_read_tokens` in the report tells you whether it is
@@ -269,11 +269,18 @@ output schema that makes an invalid category unrepresentable. It is rebuilt from
 audited line rather than transcribed, so it cannot drift from the request the code
 actually makes.
 
-`--stub` swaps vision extraction for the generator's own output, so the rest of the
-pipeline runs with no key and no cost. It makes extraction **100% accurate by
-construction**, so any eval using it measures the classifier and policy layer only.
-The report labels those runs, because that number must never be quoted as if the
-model had read the page.
+`--stub` takes the whole process offline: vision extraction is swapped for the
+generator's own output, classification runs its deterministic path only, dense
+retrieval uses the local hashing embedder, and the LLM rerank is skipped. No key and
+no network are needed, and **a key that is configured is ignored**, so a stub run can
+never spend money. Extraction is **100% accurate by construction** and every line that
+needs the model goes to a human as UNKNOWN, so a stub eval measures the code, not the
+model: expect accuracy far below the measured results below, with dollar recall and
+false disputes unaffected. The report labels those runs, because that number must
+never be quoted as if the model had read the page or judged a line.
+
+(Until 2026-09-24, `--stub` skipped only extraction and still called the model for
+classification whenever a key was set. A regression test now pins it offline.)
 
 ---
 

@@ -284,7 +284,8 @@ def score_retrieval(con, strategies: list[str], k: int = 4) -> dict:
     out: dict[str, dict] = {}
     for strat in strategies:
         if strat == "hybrid_rerank" and not llm.available():
-            out[strat] = {"skipped": "needs ANTHROPIC_API_KEY"}
+            out[strat] = {"skipped": "offline (--stub)" if llm.offline()
+                          else "needs ANTHROPIC_API_KEY"}
             continue
         hits_at = 0
         detail = {}
@@ -328,8 +329,10 @@ def render(report: dict) -> str:
     for stage, mid in run["usage"].get("models", {}).items():
         add(f"  model.{stage:<8}{mid}")
     if run["mode"].startswith("stub"):
-        add("  NOTE          stub extraction is 100% accurate by construction. These")
-        add("                numbers measure the classifier and policy layer ONLY.")
+        add("  NOTE          stub run: no model calls. Extraction is 100% accurate by")
+        add("                construction and classification is the deterministic path")
+        add("                only, so lines that need the model go to a human as UNKNOWN.")
+        add("                These numbers measure the code, never the model.")
     add("")
     add("-- OPERATIONS " + "-" * 63)
     add(f"  lines audited            {run['lines_audited']}")
@@ -399,7 +402,8 @@ def render(report: dict) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run the carrier-audit eval.")
     ap.add_argument("--stub", action="store_true",
-                    help="Skip vision extraction; measures the classifier only.")
+                    help="No model or network calls at all: stub extraction and "
+                         "deterministic classification. Free.")
     ap.add_argument("--strategy", default="hybrid",
                     choices=["bm25", "dense", "hybrid", "hybrid_rerank"])
     ap.add_argument("--limit", type=int, default=None, help="Audit only the first N invoices.")
@@ -414,6 +418,8 @@ def main() -> int:
                     help="Replay a prior run's extraction ('last' for the most recent). "
                          "Costs only the classifier -- use it to iterate on classification.")
     args = ap.parse_args()
+    if args.stub:
+        llm.go_offline()
 
     import os
     for flag, env in (("model", "CARRIER_AUDIT_MODEL"),

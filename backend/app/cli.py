@@ -55,6 +55,8 @@ def cmd_run(args: argparse.Namespace) -> int:
     if not db.rows(con, "SELECT 1 FROM invoices LIMIT 1"):
         print("No data. Run:  python -m app.cli seed", file=sys.stderr)
         return 1
+    if args.stub:
+        llm.go_offline()
     if not args.stub and not llm.available():
         print("ANTHROPIC_API_KEY is not set, so vision extraction cannot run.\n"
               "Either export the key, or use --stub to exercise everything else.",
@@ -407,7 +409,8 @@ def main() -> int:
     p.set_defaults(fn=cmd_seed)
 
     p = sub.add_parser("run", help="audit every invoice")
-    p.add_argument("--stub", action="store_true", help="skip vision extraction")
+    p.add_argument("--stub", action="store_true",
+                   help="no model or network calls: stub extraction, deterministic classification")
     p.add_argument("--strategy", default="hybrid",
                    choices=["bm25", "dense", "hybrid", "hybrid_rerank"])
     p.add_argument("--limit", type=int, default=None)

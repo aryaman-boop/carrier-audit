@@ -127,12 +127,33 @@ class Usage:
 _client: anthropic.Anthropic | None = None
 
 
+_offline = False
+
+
+def go_offline() -> None:
+    """Refuse every model call for the rest of the process.
+
+    `--stub` sets this. Before it existed, `--stub` skipped only vision extraction:
+    classification still called the model whenever a key was in the environment or
+    in a .env file, so a run documented as free spent real money on anyone who had
+    a key configured. Offline is now a property of the process, not of one stage.
+    """
+    global _offline
+    _offline = True
+
+
+def offline() -> bool:
+    return _offline
+
+
 def available() -> bool:
-    return bool(os.environ.get("ANTHROPIC_API_KEY"))
+    return not _offline and bool(os.environ.get("ANTHROPIC_API_KEY"))
 
 
 def client() -> anthropic.Anthropic:
     global _client
+    if _offline:
+        raise LLMUnavailable("Model calls are disabled for this run (--stub).")
     if not available():
         raise LLMUnavailable(
             "ANTHROPIC_API_KEY is not set. The extraction and classification stages "

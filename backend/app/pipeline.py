@@ -158,7 +158,7 @@ def run(
                     before = usage.cost_usd
                     cls, clauses, decided_by = classify_mod.classify(
                         con, rec, usage=usage, strategy=strategy,
-                        use_model=not stub or llm.available(),
+                        use_model=not stub,
                         billed_charges=line.charges,
                     )
                     ev["cost_usd"] = round(usage.cost_usd - before, 6)
