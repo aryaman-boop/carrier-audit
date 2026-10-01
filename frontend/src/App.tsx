@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Dashboard from "./Dashboard";
 import LiveClock from "./LiveClock";
 import Toasts, { type ToastMsg } from "./Toast";
@@ -504,11 +504,17 @@ export default function App() {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
+  // Changing the filter and then the sort starts two loads, and nothing makes the
+  // older one finish first. Without this guard a slow, stale response landed last
+  // and overwrote the newer one: the dropdown said "oldest first" while the rows
+  // were in invoice order. Found by the Playwright sort spec; only the latest
+  // load may write state.
+  const loadSeq = useRef(0);
+
   const load = useCallback(async () => {
+    const seq = ++loadSeq.current;
     try {
       const s = await api<Summary>("/summary");
-      setSummary(s);
-      setRunId(s.run_id);
       const sortQs = sort === "invoice" ? "" : `sort=${sort}`;
       const qs0 = filter === "ALL"
         ? ""
@@ -517,6 +523,9 @@ export default function App() {
           : `?disposition=${filter}`;
       const qs = qs0 ? (sortQs ? `${qs0}&${sortQs}` : qs0) : sortQs ? `?${sortQs}` : "";
       const q = await api<{ items: AuditedLine[] }>(`/queue${qs}`);
+      if (seq !== loadSeq.current) return;
+      setSummary(s);
+      setRunId(s.run_id);
       setItems(q.items);
       setSelected((prev) =>
         prev && q.items.some((i) => i.pro_number + i.invoice_number === prev)
@@ -527,7 +536,7 @@ export default function App() {
       );
       setError(null);
     } catch (e) {
-      setError(String(e));
+      if (seq === loadSeq.current) setError(String(e));
     }
   }, [filter, sort]);
 

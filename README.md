@@ -145,7 +145,39 @@ python -m app.cli seed                 # synthetic book + invoice PDFs
 python -m pytest tests/ -q             # 67 tests, no API key needed
 python eval/run_eval.py --stub         # full eval, no API key needed
 python -m app.cli serve                # review UI at http://127.0.0.1:8000
+
+cd ../frontend && npm install && npx playwright install chromium
+npm run test:e2e                       # 15 browser tests, no API key needed
 ```
+
+### Browser tests
+
+`frontend/e2e/` is a Playwright suite that drives the built review UI in
+Chromium. `backend/e2e_server.py` serves it from a **throwaway, freshly seeded
+database with every model call disabled**, for the same reason `conftest.py`
+isolates the unit tests: a test that opens the real database writes fiction into
+an append-only audit record. A run costs nothing and never touches
+`backend/data/`.
+
+The specs compare what the page shows against what the API returns rather than
+pinning counts: every filter chip, each bucket's rows in order, a reviewer
+decision that is logged, counted and survives a reload, the duplicate-PRO lines
+that code disputes without a model, tariff search, the Operations tab, and the
+upload gates.
+
+What it does **not** cover, deliberately: with no model configured, an uploaded
+PDF stops at TRIAGE, so the suite tests only the gates that are free by design
+(FILE: not a PDF, empty, encrypted) and that a TRIAGE refusal arrives as a
+notification rather than a panel. Acceptance through EXTRACT, SUM_CHECK and
+OWNERSHIP needs a model and is the eval harness's job.
+
+**It found a real bug on its first runs.** The sort spec failed one run in three.
+Switching bucket and then sort starts two queue loads, and nothing made the older
+one finish first, so a slow stale response could land last and overwrite the
+newer one: the dropdown read "oldest first" over rows in invoice order. `load()`
+now discards any response that is not from the latest request. The regression
+spec holds the stale response back on purpose so the bad ordering happens every
+run; it fails without the fix and passes with it.
 
 ### The API key
 
@@ -501,7 +533,9 @@ backend/eval/
                  costs to be wrong on it, and what none of them measure
 backend/tests/
   test_model_paths.py  the three model-dependent paths, against a fake client
+backend/e2e_server.py  isolated, offline server for the browser tests
 frontend/        React + TypeScript review UI
+frontend/e2e/    Playwright browser tests against the built UI
 ```
 
 ## Known gaps
